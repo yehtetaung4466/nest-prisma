@@ -1,0 +1,8 @@
+model Product {
+  id       Int      @id @default(autoincrement())
+  name     String   @db.VarChar(255)
+  price    Int
+  image    String?  @db.VarChar(255)
+  detail  Detail?
+  @@map("products")
+}

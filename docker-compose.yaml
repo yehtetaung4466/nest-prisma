@@ -1,0 +1,38 @@
+
+services:
+  postgres:
+    image: postgres:latest
+    restart: always
+    user: postgres
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 30s
+      retries: 5
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: connect_db
+    ports:
+      - "5432:5432" # Expose PostgreSQL on the default port
+    volumes:
+      - pg_volume:/var/lib/postgresql/data # Persist data
+    command: ["postgres", "-c", "listen_addresses=*"]
+
+  minio:
+    image: minio/minio
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: password
+    ports:
+      - "9000:9000"  # Expose MinIO API (Object Storage) on port 9000
+      - "4300:4300"  # Expose MinIO Console (Web UI) on port 4300
+    volumes:
+      - minio_volume:/data
+    command: server /data --console-address ":4300"
+    restart: always
+
+volumes:
+  pg_volume:
+  pgadmin_volume:
+  minio_volume:  # Persist data for MinIO

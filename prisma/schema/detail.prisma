@@ -1,0 +1,8 @@
+model Detail {
+  id          Int      @id @default(autoincrement())
+  description String   @db.VarChar(255)
+  productId   Int      @unique
+  product     Product  @relation(fields: [productId], references: [id])
+
+  @@map("details")
+}
