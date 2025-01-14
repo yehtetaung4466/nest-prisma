@@ -27,7 +27,7 @@ export class HandleFileInterceptor implements NestInterceptor {
     const fileFilter = (req: any, file: Express.Multer.File, cb: Function) => {
       // Handle "allowMimeTypes" option
       if (this.options.allowMimeTypes && !this.options.allowMimeTypes.includes(file.mimetype)) {
-        return cb(new BadRequestException(`Invalid file type. Allowed types: ${this.options.allowMimeTypes.join(', ')}`), false);
+        return cb(new BadRequestException([`Invalid file type. Allowed types: ${this.options.allowMimeTypes.join(', ')}`]), false);
       }
       cb(null, true);
     };
@@ -58,7 +58,7 @@ export class HandleFileInterceptor implements NestInterceptor {
 
     // Handle "required" option
     if (this.options.required && !file) {
-      throw new BadRequestException(`File "${this.fieldName}" is required.`);
+      throw new BadRequestException([`File "${this.fieldName}" is required.`]);
     }
 
     if (file) {

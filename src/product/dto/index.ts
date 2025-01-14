@@ -6,12 +6,11 @@ export class ProductDto {
     @IsNotEmpty()
     name: string
 
-
-
     @IsNumber()
     @IsNotEmpty()
     @Type(()=>Number)
     price: number
+    
     @IsOptional()
     image?: MultipartFile
 }
