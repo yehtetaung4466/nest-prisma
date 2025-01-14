@@ -33,7 +33,6 @@ const binaryMimeTypes = [
 async function bootstrap() {
   const app = express();
   const nestApp = await NestFactory.create(AppModule, new ExpressAdapter(app));
-  serverless
 
   nestApp.setGlobalPrefix('/api');
   nestApp.enableCors();
