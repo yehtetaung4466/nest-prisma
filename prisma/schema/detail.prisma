@@ -1,8 +1,8 @@
 model Detail {
   id          Int      @id @default(autoincrement())
   description String   @db.VarChar(255)
-  productId   Int      @unique
-  product     Product  @relation(fields: [productId], references: [id])
+  product_id   Int      @unique
+  product     Product  @relation(fields: [product_id], references: [id])
 
   @@map("details")
 }

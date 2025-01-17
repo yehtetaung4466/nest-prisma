@@ -21,6 +21,7 @@ export class PrismaService
     console.log('created new database');
     
     this.db = new PrismaClient({
+      log: ['query'],
       datasources: {
         db: {
           url: databaseUrl, // Use the passed database URL
