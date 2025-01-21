@@ -31,5 +31,5 @@ export class ProductController {
   //   const createdProduct = await this.productService.create([product]);
   //   return new DAO(['product'], createdProduct)
   // }
-
+ 
 }

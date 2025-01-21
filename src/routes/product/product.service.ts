@@ -1,9 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
 import { S3Service } from 'src/shared/modules/s3/s3.service';
-import { ProductDto } from './dto';
 import { Prisma, PrismaClient } from '@prisma/client';
-import {getAllProduct} from '@prisma/client/sql'
 @Injectable()
 export class ProductService {
     constructor(
