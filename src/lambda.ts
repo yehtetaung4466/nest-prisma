@@ -2,13 +2,12 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import serverless from 'serverless-http';
 import { ExpressAdapter } from '@nestjs/platform-express';
-import * as express from 'express';
+import express from 'express';
 import { AppModule } from 'src/app.module';
 import { GeneralErrorException, GeneralHttpException } from 'src/shared/exceptions';
 
 const binaryMimeTypes = [
   'application/javascript',
-  'application/json',
   'application/pdf',
   'application/octet-stream',
   'application/xml',
@@ -27,12 +26,14 @@ const binaryMimeTypes = [
   'application/x-font-ttf',
   'font/ttf',
   'font/otf',
-  'multipart/form-data'
+  'multipart/form-data',
+  'image/webp'
 ];
 
 async function bootstrap() {
-  const app = express();
-  const nestApp = await NestFactory.create(AppModule, new ExpressAdapter(app));
+  try{
+    const app = express();
+  const nestApp = await NestFactory.create(AppModule, new ExpressAdapter(app),{logger:false});
 
   nestApp.setGlobalPrefix('/api');
   nestApp.enableCors();
@@ -50,8 +51,24 @@ async function bootstrap() {
   return serverless(app, {
     binary: binaryMimeTypes,
   });
+    
+  }catch(error){
+    console.error(error);
+    throw new Error('bootstrap error')
+  }
 }
 
-bootstrap().then((handler) => {
-  module.exports.handler = handler;
-});
+export const  handler = async (event, context) => {
+  
+  try {
+      const server = await bootstrap();
+      return server(event, context);
+  }
+  catch (error) {
+      console.error(error);
+      return {
+          statusCode: 500,
+          body: JSON.stringify({ error, message: 'error' }),
+      };
+  }
+};

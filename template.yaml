@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Nest.js app deployment with AWS SAM
+
+Resources:
+  NestJsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: ./src/lambda.handler
+      Runtime: nodejs18.x
+      CodeUri: ./dist
+      MemorySize: 512
+      Timeout: 30
+      Events:
+        ApiGateway:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+            RestApiId: !Ref ApiGateway
+
+  ApiGateway:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: NestJsApi
+      BinaryMediaTypes:
+        - 'multipart/form-data'
+        - 'image/png'
+        - 'application/octet-stream'
+        - 'image/jpeg'
+        - 'image/gif'  # Add any other binary types your app needs
+        - 'image/webp'
+
+Outputs:
+  ApiGatewayUrl:
+    Value: !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/production/'

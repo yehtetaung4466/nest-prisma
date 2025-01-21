@@ -3,7 +3,6 @@ import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
 import { S3Service } from 'src/shared/modules/s3/s3.service';
 import { ProductDto } from './dto';
 import { Prisma, PrismaClient } from '@prisma/client';
-import { Sequelize } from 'sequelize';
 import {getAllProduct} from '@prisma/client/sql'
 @Injectable()
 export class ProductService {
@@ -12,12 +11,18 @@ export class ProductService {
         private readonly s3:S3Service,
     ) {}
 
+
     async findAll() {
       const databaseUrl = 'postgres://postgres:password@localhost:5432/connect_db';
-      const db = this.prisma.buildDb(databaseUrl);
+      const id = 1
+      const db = this.prisma.buildDb('domain1');
     
       // Simulate user input for the injection test
       const userInput = "' OR 1=1 --";  // This would simulate an SQL injection
+
+      // const db = new Sequelize('postgres://postgres:password@localhost:5432/connect_db')
+
+
     
       // Vulnerable query where user input is directly concatenated
       const query = Prisma.sql`
@@ -26,11 +31,29 @@ export class ProductService {
           'description', d.description
         ) AS detail
         FROM products p
-        LEFT JOIN details d ON p.id = d.product_id;
+        LEFT JOIN details d ON p.id = d.product_id WHERE p.id  = ${id};
       `;
     
       // Running the potentially unsafe query
-      const products = await db.$queryRaw(query);
+      const products = await db.$queryRaw`
+        SELECT p.*, JSON_BUILD_OBJECT(
+          'id', d.id,
+          'description', d.description
+        ) AS detail
+        FROM products p
+        LEFT JOIN details d ON p.id = d.product_id WHERE p.id  = ${id};
+      `;
+      // const [_,products]:any = await db.query(`SELECT p.*, JSON_BUILD_OBJECT(
+      //     'id', d.id,
+      //     'description', d.description
+      //   ) AS detail
+      //   FROM products p
+      //   LEFT JOIN details d ON p.id = d.product_id WHERE id = :id;
+      //   `,{
+      //     replacements:{
+      //       id:1
+      //     },
+      //   })
     
       return products;
     }

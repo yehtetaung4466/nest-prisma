@@ -1,10 +1,7 @@
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler, BadRequestException } from '@nestjs/common';
-import * as multer from 'multer';
-import * as sharp from 'sharp';
+import multer from 'multer';
+import sharp from 'sharp';
 import { Observable } from 'rxjs';
-import * as fs from 'fs';
-import * as path from 'path';
-import MultipartFile from '../classes/multipartfile';
 
 interface ResizeAndBindOptions {
   required?: boolean;
@@ -40,19 +37,33 @@ export class HandleFileInterceptor implements NestInterceptor {
   }
 
   async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
-    const httpContext = context.switchToHttp();
+    try {
+      const httpContext = context.switchToHttp();
     const request = httpContext.getRequest();
+    console.log('request');
+    console.log(request);
+    
+    
 
     // Use Multer to handle the file upload process
-    await new Promise<void>((resolve, reject) => {
-      this.upload.single(this.fieldName)(request, httpContext.getResponse(), (err: any) => {
-        if (err) {
-          reject(err); // If any error, reject the promise
-        } else {
-          resolve(); // Otherwise resolve
-        }
+    try {
+      await new Promise<void>((resolve, reject) => {
+        this.upload.single(this.fieldName)(request, httpContext.getResponse(), (err: any) => {
+          if (err) {
+            reject(err); // If any error, reject the promise
+          } else {
+            resolve(); // Otherwise resolve
+          }
+        });
       });
-    });
+      
+    } catch (error) {
+      console.log(error);
+      console.log('inside promises');
+      
+      
+      
+    }
 
     const file = request.file;
 
@@ -78,5 +89,12 @@ export class HandleFileInterceptor implements NestInterceptor {
     }
 
     return next.handle();
+      
+    } catch (error) {
+      console.log(error);
+      throw new Error('file interceptor error')
+      
+      
+    }
   }
 }
