@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, UseInterceptors } from '@nestjs/common';
 import { AppService } from './app.service';
 import { NoFilesInterceptor } from '@nestjs/platform-express';
 import DAO from './shared/classes/dao';
-import { HandleFileInterceptor } from './shared/interceptors/handlefile.interceptor';
+import { HandleFileInterceptor } from './core/interceptors/handlefile.interceptor';
 
 @Controller()
 export class AppController {

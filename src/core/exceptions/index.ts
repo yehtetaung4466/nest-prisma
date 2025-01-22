@@ -6,7 +6,7 @@ import {
     HttpStatus,
   } from '@nestjs/common';
   import { Response } from 'express';
-import DAO from '../classes/dao';
+import DAO from '../../shared/classes/dao';
 
   
   @Catch(HttpException)

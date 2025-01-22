@@ -18,6 +18,7 @@ Resources:
             Path: /{proxy+}
             Method: ANY
             RestApiId: !Ref ApiGateway
+            
 
   ApiGateway:
     Type: AWS::ApiGateway::RestApi

@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Req, UseInterceptors } from '@nestjs/commo
 import { ProductService } from './product.service';
 import DAO from 'src/shared/classes/dao';
 import { ProductDto } from './dto';
-import { HandleFileInterceptor } from 'src/shared/interceptors/handlefile.interceptor';
+import { HandleFileInterceptor } from 'src/core/interceptors/handlefile.interceptor';
 
 @Controller('products')
 export class ProductController {

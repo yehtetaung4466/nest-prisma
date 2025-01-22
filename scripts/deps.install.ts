@@ -26,7 +26,7 @@ if (existsSync(rootPackageJsonPath)) {
 // Run npm install in the target directory
 const installDependencies = () => {
   console.log(`Installing node_modules in '${functionPath}'...`);
-  exec('pnpm i --prod', { cwd: functionPath }, (error, stdout, stderr) => {
+  exec('npm install --production', { cwd: functionPath }, (error, stdout, stderr) => {
     if (error) {
       console.error(`Error: Failed to install node_modules in '${functionPath}'`);
       console.error(error.message);

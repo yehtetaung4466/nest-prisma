@@ -1,47 +1,24 @@
-import { exec } from "child_process";
+import { Sequelize } from 'sequelize-typescript';
+import * as models from '../src/core/database/models'; // Adjust the path to your models
 
-// List of database URLs
-const databaseUrls = [
-  "your_database_url_1",
-  "your_database_url_2",
-  "your_database_url_3"
-];
-
-// Function to execute the migration command for each database
-function runMigration(databaseUrl:string) {
-  return new Promise((resolve, reject) => {
-    console.log(`Migrating database with URL: ${databaseUrl}...`);
-    exec(`DATABASE_URL=${databaseUrl} npx prisma migrate deploy`, (error, stdout, stderr) => {
-      if (error) {
-        reject(`Error executing migration for ${databaseUrl}: ${stderr}`);
-      } else {
-        resolve(`Migration successful for ${databaseUrl}: ${stdout}`);
-      }
-    });
-  });
-}
-
-// Main migration function that runs migrations for all databases
-async function migrate() {
-  const migrationPromises = databaseUrls.map(databaseUrl => runMigration(databaseUrl));
-
+(async () => {
   try {
-    // Wait for all migrations to complete concurrently
-    const results = await Promise.allSettled(migrationPromises);
+    // Extract models from the `models` object
+    const modelList = Object.values(models);
 
-    // Log results of each migration attempt
-    results.forEach(result => {
-      if (result.status === 'fulfilled') {
-        console.log(result.value);
-      } else {
-        console.error(result.reason);
-      }
+    // Create a Sequelize instance
+    const sequelize = new Sequelize('postgres://postgres:password@localhost:5432/connect_db', {
+      models: modelList, // Pass the array of models here
     });
-  } catch (error) {
-    // If any migration fails, you can log it, but it won't stop the others
-    console.error(`Migration process encountered an error: ${error}`);
-  }
-}
 
-// Start the migration process
-migrate();
+    // Synchronize the database
+    await sequelize.sync({ alter: true }); // Use `alter: true` for safe updates without dropping tables
+    console.log('Database synchronized successfully.');
+
+    // Close the connection
+    await sequelize.close();
+  } catch (error) {
+    console.error('Error during database synchronization:', error);
+    process.exit(1);
+  }
+})();

@@ -7,7 +7,7 @@ import {
   DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import MultipartFile from '../../classes/multipartfile';
+import MultipartFile from '../../../shared/classes/multipartfile';
 
 @Injectable()
 export class S3Service {
@@ -33,7 +33,6 @@ export class S3Service {
   }
 
   async upload(file: MultipartFile): Promise<string> {
-    console.log(this.configService.get<string>('S3_URL'));
     
     const imageBuffer = Buffer.from(file.buffer);
     

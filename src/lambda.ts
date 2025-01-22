@@ -4,7 +4,7 @@ import serverless from 'serverless-http';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import express from 'express';
 import { AppModule } from 'src/app.module';
-import { GeneralErrorException, GeneralHttpException } from 'src/shared/exceptions';
+import { GeneralErrorException, GeneralHttpException } from 'src/core/exceptions';
 
 const binaryMimeTypes = [
   'application/javascript',
