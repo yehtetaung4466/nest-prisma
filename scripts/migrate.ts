@@ -12,7 +12,11 @@ import * as models from '../src/core/database/models'; // Adjust the path to you
     });
 
     // Synchronize the database
-    await sequelize.sync({ alter: true }); // Use `alter: true` for safe updates without dropping tables
+    await sequelize.sync({ alter: {
+      drop: false,
+
+      
+    } }); // Use `alter: true` for safe updates without dropping tables
     console.log('Database synchronized successfully.');
 
     // Close the connection
