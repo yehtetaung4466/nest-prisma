@@ -1,21 +1,40 @@
-import { Injectable} from '@nestjs/common';
-import { Sequelize } from 'sequelize-typescript';
-import * as models from 'src/core/database/models';
+import { Injectable } from '@nestjs/common';
+import { DataSource } from 'typeorm';
+import * as entities from './entities';
 
 @Injectable()
-export class DatabaseProvider{
-    private domain?: string;
-    private db?: Sequelize;
+export class DatabaseProvider {
+  private domainToDataSource: Map<string, DataSource> = new Map();
 
-    build(domain: string) {
-
-        if(domain === this.domain && this.db) return this.db;
-        // Extract models from the `models` object
-        const modelList = Object.values(models);
-
-        this.db = new Sequelize('postgres://postgres:password@localhost:5432/connect_db', {
-            models: modelList, // Pass the array of models here
-        });
-        return this.db
+  async build(domain: string): Promise<DataSource> {
+    // Check if the DataSource for this domain is already initialized
+    if (this.domainToDataSource.has(domain)) {
+      const existingDataSource = this.domainToDataSource.get(domain);
+      if (existingDataSource?.isInitialized) {
+        return existingDataSource;
+      }
     }
+
+
+    const en = Object.values(entities);
+
+    // Create a new DataSource for this domain
+    const newDataSource = new DataSource({
+      type: 'postgres',
+      url: `postgres://postgres:password@localhost:5432/connect_db`, // Adjust as needed
+      entities: [...en],
+    //   synchronize: false, // Use migrations in production instead of auto-sync
+      logging: true,
+    });
+    console.log(__dirname);
+    
+
+    // Initialize the DataSource
+    await newDataSource.initialize();
+
+    // Cache the initialized DataSource
+    this.domainToDataSource.set(domain, newDataSource);
+
+    return newDataSource;
+  }
 }

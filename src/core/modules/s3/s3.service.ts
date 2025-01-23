@@ -23,7 +23,6 @@ export class S3Service {
 
     this.bucketName = this.configService.get<string>('S3_BUCKET_NAME', 'my-bucket');
     this.isLocal = this.configService.get<string>('NODE_ENV') === 'local';
-
     this.s3Client = new S3Client({
       endpoint,
       credentials: { accessKeyId, secretAccessKey },

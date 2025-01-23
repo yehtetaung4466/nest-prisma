@@ -20,16 +20,16 @@ export class ProductController {
   //   const product = await this.productService.findOne(id);
   //   return new DAO(['product'], product)
   // }
-  // @UseInterceptors(
-  //   new HandleFileInterceptor('image',{
-  //     required: true
-  //   })
-  // )
-  // @Post()
-  // async create(
-  //   @Body() product: ProductDto) {
-  //   const createdProduct = await this.productService.create([product]);
-  //   return new DAO(['product'], createdProduct)
-  // }
+  @UseInterceptors(
+    new HandleFileInterceptor('image',{
+      required: false
+    })
+  )
+  @Post()
+  async create(
+    @Body() product: ProductDto) {
+    const createdProduct = await this.productService.create([product]);
+    return new DAO(['product'], createdProduct)
+  }
  
 }

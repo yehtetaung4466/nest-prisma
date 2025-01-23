@@ -37,16 +37,14 @@ export class HandleFileInterceptor implements NestInterceptor {
   }
 
   async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
-    try {
+    
       const httpContext = context.switchToHttp();
     const request = httpContext.getRequest();
-    console.log('request');
-    console.log(request);
     
     
 
     // Use Multer to handle the file upload process
-    try {
+  
       await new Promise<void>((resolve, reject) => {
         this.upload.single(this.fieldName)(request, httpContext.getResponse(), (err: any) => {
           if (err) {
@@ -57,13 +55,7 @@ export class HandleFileInterceptor implements NestInterceptor {
         });
       });
       
-    } catch (error) {
-      console.log(error);
-      console.log('inside promises');
-      
-      
-      
-    }
+    
 
     const file = request.file;
 
@@ -90,11 +82,5 @@ export class HandleFileInterceptor implements NestInterceptor {
 
     return next.handle();
       
-    } catch (error) {
-      console.log(error);
-      throw new Error('file interceptor error')
-      
-      
-    }
   }
 }

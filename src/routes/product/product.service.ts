@@ -1,11 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable} from '@nestjs/common';
 import { S3Service } from 'src/core/modules/s3/s3.service';
-import { Product } from 'src/core/database/models/product';
-import { InjectModel } from '@nestjs/sequelize';
-import { Sequelize } from 'sequelize-typescript';
 import { DatabaseProvider } from 'src/core/database/database.provider';
-import { Detail } from 'src/core/database/models/detail';
+
 import { ProductDto } from './dto';
+import { Product } from 'src/core/database/entities/Product';
 @Injectable()
 export class ProductService {
     constructor(
@@ -15,13 +13,19 @@ export class ProductService {
 
 
     async findAll() {
-      const databaseUrl = 'postgres://postgres:password@localhost:5432/connect_db';
       // const db = new Sequelize(databaseUrl,{
       //   models:[Product]
       // })
-      const db = this.database.build('domain1')
+      const db = await this.database.build('domain1')
       const ProductRepo = db.getRepository(Product)
-      const products = await ProductRepo.findAll({include:{model:Detail}})
+      const products = await ProductRepo.find()
+      const finalProducts = await Promise.all(products.map(async(p)=>{
+        if(p.image){
+          p.image = await this.s3.getSignedUrl(p.image)
+        }
+        return p
+      }))
+
     
       return products;
     }
@@ -45,9 +49,21 @@ export class ProductService {
   //   }
     async create(products: ProductDto[]) {
 
-      const db = this.database.build('domain1')
+      const db = await this.database.build('domain1')
       const ProductRepo = db.getRepository(Product)
-      ProductRepo.bulkCreate<Product>([])
+      const productsToInsertsPromises =  products.map(async(p)=>{
+        let image:string = undefined
+        if(p.image) {
+          image = await this.s3.upload(p.image)
+        }
+        delete p.image
+        return {
+          ...p,
+          image,
+        }
+      })
+      const ps = await Promise.all(productsToInsertsPromises)
+      await ProductRepo.insert(ps)
       
           //
       }

@@ -3,14 +3,15 @@ import { AppService } from './app.service';
 import { NoFilesInterceptor } from '@nestjs/platform-express';
 import DAO from './shared/classes/dao';
 import { HandleFileInterceptor } from './core/interceptors/handlefile.interceptor';
+import Domain from './core/decorators/domain.decorator';
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  getHello() {
-    return {message:'hello world'};
+  getHello(@Domain() domain:string) {
+    return {message:'hello world',domain};
   }
 
   @Post()
