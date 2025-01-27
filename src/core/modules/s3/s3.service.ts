@@ -38,7 +38,7 @@ export class S3Service {
 
     const s3Params = {
       Bucket: this.bucketName,
-      Key: `product-images/${Date.now()}-${file.originalname}`,
+      Key: `connect-365/${Date.now()}-${file.originalname}`,
       Body: imageBuffer,
       ContentType: file.mimetype,
     };

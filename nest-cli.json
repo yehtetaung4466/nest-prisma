@@ -4,5 +4,10 @@
   "sourceRoot": "src",
   "compilerOptions": {
     "deleteOutDir": true
+  },
+  "generateOptions": {
+    "baseDir": "modules",
+    "spec": true,
+    "flat": false
   }
 }
