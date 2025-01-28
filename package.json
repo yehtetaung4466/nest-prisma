@@ -21,9 +21,9 @@
       "test:e2e": "jest --config ./test/jest-e2e.json",
       "deps": "ts-node scripts/deps.install.ts",
       "schema:load": "barrelsby --directory ./src/core/database/entities --location top --delete",
-      "migrate": "ts-node ./node_modules/typeorm/cli.js migration:run -d ./src/core/database/datasource.ts",
+      "migrate:dev": "ts-node scripts/migrate.dev.ts",
       "typeorm": "typeorm-ts-node-commonjs",
-      "migrate:generate": "ts-node ./node_modules/typeorm/cli.js migration:generate ./migrations/migrations -d ./src/core/database/datasource.ts"
+      "migrate:generate:dev": "ts-node scripts/migrate.generate.dev.ts"
    },
    "dependencies": {
       "@aws-sdk/client-s3": "^3.733.0",

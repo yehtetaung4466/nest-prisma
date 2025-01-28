@@ -1,5 +1,5 @@
 import { Injectable} from '@nestjs/common';
-import { S3Service } from 'src/core/modules/s3/s3.service';
+import { S3Service } from 'src/core/s3/s3.service';
 import { DatabaseProvider } from 'src/core/database/database.provider';
 
 import { ProductDto } from './dto';
@@ -13,21 +13,23 @@ export class ProductService {
 
 
     async findAll() {
-      // const db = new Sequelize(databaseUrl,{
-      //   models:[Product]
-      // })
       const db = await this.database.build('domain1')
+      const queryBuilder = db
+      .createQueryBuilder()
+      // const products = await queryBuilder
+      // .select("id,name,price,image")
+      // .from(Product,'p')
+      // .where('p.id = :id' ,{id:3})
+      // .getRawMany()
       const ProductRepo = db.getRepository(Product)
       const products = await ProductRepo.find()
-      const finalProducts = await Promise.all(products.map(async(p)=>{
+       const finalProducts = await Promise.all(products.map(async(p)=>{
         if(p.image){
           p.image = await this.s3.getSignedUrl(p.image)
         }
         return p
       }))
-
-    
-      return products;
+      return finalProducts;
     }
     
     

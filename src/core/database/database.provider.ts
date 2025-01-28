@@ -1,10 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import * as entities from './entities';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class DatabaseProvider {
   private domainToDataSource: Map<string, DataSource> = new Map();
+  private isLocal:boolean
+
+  constructor(private readonly config:ConfigService) {
+    this.isLocal = this.config.get<string>('isLocal') ==='local'
+  }
 
   async build(domain: string): Promise<DataSource> {
     // Check if the DataSource for this domain is already initialized
@@ -24,9 +30,8 @@ export class DatabaseProvider {
       url: `postgres://postgres:password@localhost:5432/connect_db`, // Adjust as needed
       entities: [...en],
     //   synchronize: false, // Use migrations in production instead of auto-sync
-      logging: true,
+      logging:this.isLocal,
     });
-    console.log(__dirname);
     
 
     // Initialize the DataSource

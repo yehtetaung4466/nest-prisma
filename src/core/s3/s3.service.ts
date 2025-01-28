@@ -7,7 +7,7 @@ import {
   DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import MultipartFile from '../../../shared/classes/multipartfile';
+import MultipartFile from '../../shared/classes/multipartfile';
 
 @Injectable()
 export class S3Service {
@@ -21,7 +21,7 @@ export class S3Service {
     const secretAccessKey = this.configService.get<string>('AWS_SECRET_ACCESS_KEY');
     const region = this.configService.get<string>('AWS_REGION');
 
-    this.bucketName = this.configService.get<string>('S3_BUCKET_NAME', 'my-bucket');
+    this.bucketName = this.configService.get<string>('S3_BUCKET_NAME');
     this.isLocal = this.configService.get<string>('NODE_ENV') === 'local';
     this.s3Client = new S3Client({
       endpoint,
@@ -45,31 +45,21 @@ export class S3Service {
 
     const command = new PutObjectCommand(s3Params);
 
-    try {
       await this.s3Client.send(command);
       return s3Params.Key;
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      throw error;
-    }
+  
   }
 
-  async download(key: string): Promise<any> {
-    const s3Params = {
-      Bucket: this.bucketName,
-      Key: key,
-    };
+  // async download(key: string): Promise<any> {
+  //   const s3Params = {
+  //     Bucket: this.bucketName,
+  //     Key: key,
+  //   };
 
-    const command = new GetObjectCommand(s3Params);
-
-    try {
-      const response = await this.s3Client.send(command);
-      return response.Body;
-    } catch (error) {
-      console.error('Error downloading file:', error);
-      throw error;
-    }
-  }
+  //   const command = new GetObjectCommand(s3Params);
+  //   const response = await this.s3Client.send(command);
+  //   return response.Body;
+  // }
 
   async getSignedUrl(key: string): Promise<string> {
     const presignedUrlParams = {
@@ -100,12 +90,7 @@ export class S3Service {
     };
 
     const command = new DeleteObjectCommand(deleteParams);
-
-    try {
-      await this.s3Client.send(command);
-    } catch (error) {
-      console.error('Error deleting file:', error);
-      throw error;
-    }
+    await this.s3Client.send(command);
+   
   }
 }

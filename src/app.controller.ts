@@ -1,6 +1,5 @@
 import { Body, Controller, Get, Post, UseInterceptors } from '@nestjs/common';
 import { AppService } from './app.service';
-import { NoFilesInterceptor } from '@nestjs/platform-express';
 import DAO from './shared/classes/dao';
 import { HandleFileInterceptor } from './core/interceptors/handlefile.interceptor';
 import Domain from './core/decorators/domain.decorator';
@@ -15,10 +14,11 @@ export class AppController {
   }
 
   @Post()
-  @UseInterceptors(new HandleFileInterceptor('file',{
+  @UseInterceptors(
+    new HandleFileInterceptor('file',{
     required:false
   }))
   getFormdata(@Body() body:any) {
-    return new DAO(['formdata',body])
+    return new DAO(['formdata'],body)
   }
 }
