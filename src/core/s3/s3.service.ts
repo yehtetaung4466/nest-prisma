@@ -5,6 +5,7 @@ import {
   PutObjectCommand,
   GetObjectCommand,
   DeleteObjectCommand,
+  GetObjectCommandInput,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import MultipartFile from '../../shared/classes/multipartfile';
@@ -65,22 +66,15 @@ export class S3Service {
     const presignedUrlParams = {
       Bucket: this.bucketName,
       Key: key,
-    };
-
-    try {
+    } satisfies GetObjectCommandInput;
       const presignedUrl = await getSignedUrl(
         this.s3Client,
         new GetObjectCommand(presignedUrlParams),
         { expiresIn: 60 * 60 }, // 1 hour
       );
 
-      return this.isLocal
-        ? presignedUrl.replace('minio', 'localhost')
-        : presignedUrl;
-    } catch (error) {
-      console.error('Error generating presigned URL:', error);
-      throw error;
-    }
+      return presignedUrl
+ 
   }
 
   async remove(key: string): Promise<void> {
