@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Req, UseInterceptors } from '@nestjs/common';
 import { ProductService } from './product.service';
 import DAO from 'src/shared/classes/dao';
 import { ProductDto } from './dto';
@@ -15,11 +15,11 @@ export class ProductController {
     return new DAO(['products'],products)
   }
 
-  // @Get(':id')
-  // async findOne(id: number) {
-  //   const product = await this.productService.findOne(id);
-  //   return new DAO(['product'], product)
-  // }
+  @Get(':id')
+  async findOne(@Param('id',ParseIntPipe) id: number) {
+    const product = await this.productService.findOne(id);
+    return new DAO(['product'], product)
+  }
   @UseInterceptors(
     new HandleFileInterceptor('image',{
       required: false

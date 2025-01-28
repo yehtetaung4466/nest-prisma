@@ -1,4 +1,4 @@
-import { Injectable} from '@nestjs/common';
+import { Injectable, NotFoundException} from '@nestjs/common';
 import { S3Service } from 'src/core/s3/s3.service';
 import { DatabaseProvider } from 'src/core/database/database.provider';
 
@@ -34,21 +34,18 @@ export class ProductService {
     
     
 
-  //   async findOne(id:number) {
-  //   const product = await this.prisma.product.findFirst({
-  //    include:{
-  //      detail:true
-  //    },
-  //    where: {
-  //      id
-  //    }
-  //   })
-  //  if(!product) throw new NotFoundException(['product not found'])
-  //  if(product.image){
-  //    product.image = await this.s3.getSignedUrl(product.image)
-  //  }
-  //  return
-  //   }
+    async findOne(id:number) {
+    const db = await this.database.build('domain1')
+    const ProductRepo = db.getRepository(Product)
+    
+    const product = await ProductRepo.findOneBy({id})  
+    
+   if(!product) throw new NotFoundException(['product not found'])
+   if(product.image){
+     product.image = await this.s3.getSignedUrl(product.image)
+   }
+   return product
+    }
     async create(products: ProductDto[]) {
 
       const db = await this.database.build('domain1')
