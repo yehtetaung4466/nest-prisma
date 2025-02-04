@@ -13,6 +13,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: connect_db
+    networks:
+      - connect-network
     ports:
       - "5432:5432" # Expose PostgreSQL on the default port
     volumes:
@@ -31,8 +33,13 @@ services:
       - minio_volume:/data
     command: server /data --console-address ":4300"
     restart: always
+    networks:
+      - connect-network
 
 volumes:
   pg_volume:
   pgadmin_volume:
   minio_volume:  # Persist data for MinIO
+networks:
+  connect-network:
+    driver: bridge

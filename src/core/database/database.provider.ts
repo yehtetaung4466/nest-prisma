@@ -23,11 +23,13 @@ export class DatabaseProvider {
 
 
     const en = Object.values(entities);
+    const url = this.config.get<string>('DATABASE_URL') + '/connect_db'
 
     // Create a new DataSource for this domain
     const newDataSource = new DataSource({
       type: 'postgres',
-      url: `postgres://postgres:password@localhost:5432/connect_db`, // Adjust as needed
+      // url: `postgres://postgres:password@postgres:5432/connect_db`, // Adjust as needed
+      url,
       entities: [...en],
     //   synchronize: false, // Use migrations in production instead of auto-sync
       logging:this.isLocal,

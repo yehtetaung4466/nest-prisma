@@ -2,6 +2,19 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: Nest.js app deployment with AWS SAM
 
+Globals:
+  Function:
+    Environment:
+      Variables:
+        NODE_ENV: local # Set the desired environment (e.g., local, development, production)
+        DATABASE_URL: postgres://postgres:password@postgres:5432
+        AWS_ACCESS_KEY_ID: admin
+        AWS_SECRET_ACCESS_KEY: password
+        AWS_REGION: us-east-1
+        S3_BUCKET_NAME: my-bucket
+        S3_URL: http://minio:9000
+        PORT: "3000"
+
 Resources:
   NestJsFunction:
     Type: AWS::Serverless::Function
@@ -18,19 +31,19 @@ Resources:
             Path: /{proxy+}
             Method: ANY
             RestApiId: !Ref ApiGateway
+            RequestParameters:
+            -  method.request.header.Content-Type  # Ensure Content-Type header is specified
             
 
   ApiGateway:
-    Type: AWS::ApiGateway::RestApi
+    Type: AWS::Serverless::Api
     Properties:
+      StageName: local
       Name: NestJsApi
       BinaryMediaTypes:
-        - 'multipart/form-data'
-        - 'image/png'
-        - 'application/octet-stream'
-        - 'image/jpeg'
-        - 'image/gif'  # Add any other binary types your app needs
-        - 'image/webp'
+      - application/octet-stream
+      - image/*
+      - multipart/form-data
 
 Outputs:
   ApiGatewayUrl:

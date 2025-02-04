@@ -19,6 +19,8 @@ export class AppController {
     required:false
   }))
   getFormdata(@Body() body:any) {
+    // console.log(body);
+    
     return new DAO(['formdata'],body)
   }
 }

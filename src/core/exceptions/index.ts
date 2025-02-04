@@ -15,6 +15,8 @@ import DAO from '../../shared/classes/dao';
       const ctx = host.switchToHttp();
       const response = ctx.getResponse<Response>();
       const status = exception.getStatus();
+      console.log(exception);
+      
       // const message = exception.message
       response.status(status).json(exception.getResponse());
     }

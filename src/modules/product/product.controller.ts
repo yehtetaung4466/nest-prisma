@@ -28,6 +28,7 @@ export class ProductController {
   @Post()
   async create(
     @Body() product: ProductDto) {
+      
     const createdProduct = await this.productService.create([product]);
     return new DAO(['product'], createdProduct)
   }

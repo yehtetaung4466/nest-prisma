@@ -1,12 +1,14 @@
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler, BadRequestException } from '@nestjs/common';
-import multer from 'multer';
-import sharp from 'sharp';
+import { Injectable, NestInterceptor, ExecutionContext, BadRequestException, CallHandler } from '@nestjs/common';
 import { Observable } from 'rxjs';
+import sharp from 'sharp';
+import { MultipartRequest, parse } from 'lambda-multipart-parser-v2';
+import multer from 'multer';
+import MultipartFile from 'src/shared/classes/multipartfile';
 
 interface ResizeAndBindOptions {
   required?: boolean;
-  allowMimeTypes?: string[]; // List of allowed MIME types
-  resizeOptions?: { width: number; height: number }; // Resize dimensions
+  allowMimeTypes?: string[];
+  resizeOptions?: { width: number; height: number };
 }
 
 @Injectable()
@@ -17,12 +19,9 @@ export class HandleFileInterceptor implements NestInterceptor {
     private readonly fieldName: string,
     private readonly options: ResizeAndBindOptions = {},
   ) {
-    // Set Multer storage configuration (memory storage to keep file in buffer)
+    // Initialize multer for local development
     const storage = multer.memoryStorage();
-
-    // Set Multer file filter and size limit (if needed)
     const fileFilter = (req: any, file: Express.Multer.File, cb: Function) => {
-      // Handle "allowMimeTypes" option
       if (this.options.allowMimeTypes && !this.options.allowMimeTypes.includes(file.mimetype)) {
         return cb(new BadRequestException([`Invalid file type. Allowed types: ${this.options.allowMimeTypes.join(', ')}`]), false);
       }
@@ -32,55 +31,116 @@ export class HandleFileInterceptor implements NestInterceptor {
     this.upload = multer({
       storage,
       fileFilter,
-      limits: { fileSize: 5 * 1024 * 1024 }, // Example: 5MB file size limit
+      limits: { fileSize: 20 * 1024 * 1024 }, // Example: 20MB file size limit
     });
   }
 
   async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
-    
-      const httpContext = context.switchToHttp();
+    const httpContext = context.switchToHttp();
     const request = httpContext.getRequest();
-    
-    
+    const response = httpContext.getResponse();
+    const contentType = request.headers['content-type'] || '';
+    if (!contentType.includes('multipart/form-data')) {
+      return next.handle();
+    }
 
-    // Use Multer to handle the file upload process
-  
-      await new Promise<void>((resolve, reject) => {
-        this.upload.single(this.fieldName)(request, httpContext.getResponse(), (err: any) => {
-          if (err) {
-            reject(err); // If any error, reject the promise
-          } else {
-            resolve(); // Otherwise resolve
-          }
-        });
+    if (this.isApiGatewayEvent(request)) {
+      await this.handleCloudFileUpload(request);
+    } else {
+      await this.handleLocalFileUpload(request,response);
+    }
+
+    return next.handle();
+  }
+
+  private isApiGatewayEvent(request: any): boolean {
+    // Check if the request contains API Gateway event properties
+    return !!request.apiGateway?.event;
+  }
+
+  private async handleLocalFileUpload(request: any,response:any): Promise<void> {
+    await new Promise<void>((resolve, reject) => {
+      this.upload.single(this.fieldName)(request, response, (err: any) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
       });
-      
-    
+    });
 
     const file = request.file;
 
-    // Handle "required" option
     if (this.options.required && !file) {
       throw new BadRequestException([`File "${this.fieldName}" is required.`]);
     }
 
     if (file) {
-      // Resize the file and convert to WebP
       const resizeOptions = this.options.resizeOptions || { width: 800, height: 800 };
       const resizedBuffer = await sharp(file.buffer)
-        .resize(resizeOptions.width, resizeOptions.height)
+        .resize(resizeOptions)
         .webp()
         .toBuffer();
 
       file.buffer = resizedBuffer;
       file.mimetype = 'image/webp';
-      file.originalname = file.originalname.split('.')[0] + '.webp';
+      file.originalname = this.getWebpFilename(file.originalname);
+      
 
-      // Attach the processed file to req.body
       request.body[this.fieldName] = file;
     }
+  }
 
-    return next.handle();
+  private async handleCloudFileUpload(request: any): Promise<void> {
+    const event = request.apiGateway.event;
+
+    let parsedResult:MultipartRequest;
+    try {
+      parsedResult = await parse(event);
+    } catch (error) {
+      throw new BadRequestException([`Failed to parse multipart data: ${error.message}`]);
+    }
+    const {files,...otherFields} = parsedResult
+    const file = files.find(f => f.fieldname === this.fieldName);
+
+    if (this.options.required && !file) {
+      throw new BadRequestException([`File "${this.fieldName}" is required.`]);
+    }
+
+    if (file) {
+      if (this.options.allowMimeTypes && !this.options.allowMimeTypes.includes(file.contentType)) {
+        throw new BadRequestException([
+          `Invalid file type for ${this.fieldName}. Allowed types: ${this.options.allowMimeTypes.join(', ')}`
+        ]);
+      }
+
+      const resizeOptions = this.options.resizeOptions || { width: 800, height: 800 };
+      const processedBuffer = await sharp(file.content)
+        .resize(resizeOptions)
+        .webp()
+        .toBuffer();
+
+      const processedFile = {
+        fieldname: this.fieldName,
+        originalname: this.getWebpFilename(file.filename),
+        mimetype: 'image/webp',
+        buffer: processedBuffer,
+        size: processedBuffer.byteLength,
+        encoding: file.encoding
+      };
+      request.body = {}
+      request.body[this.fieldName] = processedFile;
+      Object.keys(otherFields).forEach(key => {
+        const value = otherFields[key];
+        request.body[key] = isNaN(Number(value)) ? value : Number(value);
+      });
       
+      
+      
+    }
+  }
+
+  private getWebpFilename(originalName: string): string {
+    return originalName.replace(/\.[^/.]+$/, '') + '.webp';
   }
 }

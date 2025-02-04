@@ -1,38 +1,23 @@
-import { ValidationPipe } from '@nestjs/common';
+import { HttpException, HttpStatus, ParseArrayPipe, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import serverless from 'serverless-http';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import express from 'express';
 import { AppModule } from 'src/app.module';
 import { GeneralErrorException, GeneralHttpException } from 'src/core/exceptions';
+import DAO from './shared/classes/dao';
 
 const binaryMimeTypes = [
-  'application/javascript',
-  'application/pdf',
   'application/octet-stream',
-  'application/xml',
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'text/comma-separated-values',
-  'text/css',
-  'text/html',
-  'text/javascript',
-  'text/plain',
-  'text/text',
-  'text/xml',
-  'image/x-icon',
-  'image/svg+xml',
-  'application/x-font-ttf',
-  'font/ttf',
-  'font/otf',
-  'multipart/form-data',
-  'image/webp'
+  'image/*',
+  'multipart/form-data'
+
 ];
 
 async function bootstrap() {
   try{
-    const app = express();
+
+  const app = express();
   const nestApp = await NestFactory.create(AppModule, new ExpressAdapter(app),{logger:false});
 
   nestApp.setGlobalPrefix('/api');
@@ -59,16 +44,40 @@ async function bootstrap() {
 }
 
 export const  handler = async (event, context) => {
+  const contentType = event.headers["Content-Type"] || event.headers["content-type"];
+
+  // if (!contentType) {
+  //   throw new HttpException(["Missing content type."],HttpStatus.BAD_REQUEST);
+  // }
+
+  // if (contentType.includes("multipart/form-data")) {
+  //   // Handle multipart/form-data
+  //     const fields = await parse(event); // Ensure multipart parser is properly configured
+  //     const payload = fields;
+  //     console.log(payload);
+      
+  // }
+  
+
+  
   
   try {
+    // await parse(event)
+    
       const server = await bootstrap();
       return server(event, context);
+      return {
+        statusCode: 200,
+        body: JSON.stringify(new DAO(['hi'],{})),
+    };
+      
   }
   catch (error) {
-      console.error(error);
+    console.log(error);
+    
       return {
           statusCode: 500,
-          body: JSON.stringify({ error, message: 'error' }),
+          body: JSON.stringify(new DAO(['Internal server error'],error)),
       };
   }
 };
