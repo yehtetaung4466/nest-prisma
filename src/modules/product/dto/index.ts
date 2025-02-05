@@ -1,4 +1,4 @@
-import {IsInstance, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString } from 'class-validator'
+import {IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString } from 'class-validator'
 import MultipartFile from 'src/shared/classes/multipartfile'
 import { Type } from 'class-transformer';
 export class ProductDto {
