@@ -9,7 +9,7 @@ export class DatabaseProvider {
   private isLocal:boolean
 
   constructor(private readonly config:ConfigService) {
-    this.isLocal = this.config.get<string>('isLocal') ==='local'
+    this.isLocal = this.config.get<string>('NODE_ENV') ==='local'
   }
 
   async build(domain: string): Promise<DataSource> {
@@ -28,10 +28,8 @@ export class DatabaseProvider {
     // Create a new DataSource for this domain
     const newDataSource = new DataSource({
       type: 'postgres',
-      // url: `postgres://postgres:password@postgres:5432/connect_db`, // Adjust as needed
       url,
       entities: [...en],
-    //   synchronize: false, // Use migrations in production instead of auto-sync
       logging:this.isLocal,
     });
     

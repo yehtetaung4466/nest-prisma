@@ -23,7 +23,7 @@ Resources:
       Runtime: nodejs18.x
       CodeUri: ./dist
       MemorySize: 512
-      Timeout: 30
+      Timeout: 1000
       Events:
         ApiGateway:
           Type: Api

@@ -3,7 +3,6 @@ import { Observable } from 'rxjs';
 import sharp from 'sharp';
 import { MultipartRequest, parse } from 'lambda-multipart-parser-v2';
 import multer from 'multer';
-import MultipartFile from 'src/shared/classes/multipartfile';
 
 interface ResizeAndBindOptions {
   required?: boolean;
@@ -44,11 +43,13 @@ export class HandleFileInterceptor implements NestInterceptor {
       return next.handle();
     }
 
-    if (this.isApiGatewayEvent(request)) {
-      await this.handleCloudFileUpload(request);
-    } else {
-      await this.handleLocalFileUpload(request,response);
-    }
+    // if (this.isApiGatewayEvent(request)) {
+    //   await this.handleCloudFileUpload(request);
+    // } else {
+    //   await this.handleLocalFileUpload(request,response);
+    // }
+
+    await this.handleLocalFileUpload(request, response);  
 
     return next.handle();
   }

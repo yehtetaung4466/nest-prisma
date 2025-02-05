@@ -1,9 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column} from 'typeorm';
-
+import { Entity, PrimaryGeneratedColumn, Column, Index} from 'typeorm';
 @Entity({
   name: 'products', // Table name
 })
 export class Product {
+  @Index()
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -23,7 +23,7 @@ export class Product {
     length:255,
     nullable: true,
   })
-  image: string;
+  image?: string;
   // @Column({
   //   generated:'uuid',
   //   type: 'uuid',

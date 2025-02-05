@@ -3,6 +3,7 @@ import { AppService } from './app.service';
 import DAO from './shared/classes/dao';
 import { HandleFileInterceptor } from './core/interceptors/handlefile.interceptor';
 import Domain from './core/decorators/domain.decorator';
+import { HandleMutiFileInterceptor } from './core/interceptors/handlemultifile.interceptor';
 
 @Controller()
 export class AppController {
@@ -22,5 +23,14 @@ export class AppController {
     // console.log(body);
     
     return new DAO(['formdata'],body)
+  }
+
+  @Post('multi')
+  @UseInterceptors(
+    new HandleMutiFileInterceptor('files',{required:true})
+  )
+  getFormDatas(@Body() body:any) {
+    
+    return new DAO(['formdata'], body)
   }
 }
