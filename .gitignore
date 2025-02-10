@@ -5,6 +5,6 @@ build/
 tmp/
 temp/
 dist/
-migrations/dev/
+migrations/dev
 
 samconfig.toml
