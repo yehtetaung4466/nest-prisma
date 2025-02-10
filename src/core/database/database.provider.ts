@@ -2,14 +2,26 @@ import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import * as entities from './entities';
 import { ConfigService } from '@nestjs/config';
+import { DOMAIN } from 'src/shared/enums/domain';
 
 @Injectable()
 export class DatabaseProvider {
   private domainToDataSource: Map<string, DataSource> = new Map();
   private isLocal:boolean
+  private databaseUrl:string
+  private readonly databaseConfigs:Array<{
+    domain:DOMAIN,
+    dbName:string
+  }> = [
+    {
+      domain:DOMAIN.MIT,
+      dbName: 'XXXXXXXXXX',
+    }
+  ]
 
   constructor(private readonly config:ConfigService) {
     this.isLocal = this.config.get<string>('NODE_ENV') ==='local'
+    this.databaseUrl = this.config.get<string>('DATABASE_URL')
   }
 
   async build(domain: string): Promise<DataSource> {
@@ -23,7 +35,7 @@ export class DatabaseProvider {
 
 
     const en = Object.values(entities);
-    const url = this.config.get<string>('DATABASE_URL') + '/connect_db'
+    const url = this.databaseUrl + (this.isLocal ? '/connect_db': this.databaseConfigs.find((d)=>d.domain === domain).dbName)
 
     // Create a new DataSource for this domain
     const newDataSource = new DataSource({

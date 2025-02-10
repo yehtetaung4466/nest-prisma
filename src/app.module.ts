@@ -5,6 +5,7 @@ import { DatabaseModule } from "./core/database/database.module";
 import { S3Module } from "./core/s3/s3.module";
 import { ConfigModule } from "@nestjs/config";
 import { ProductModule } from "./modules/product/product.module";
+import { AttendanceModule } from './modules/attendance/attendance.module';
 
 // app.module.ts
 @Module({
@@ -12,7 +13,7 @@ import { ProductModule } from "./modules/product/product.module";
     ConfigModule.forRoot(),
     DatabaseModule, // Eagerly loaded (global)
     S3Module, // Eagerly loaded (global),
-    ProductModule,
+    ProductModule, AttendanceModule,
   ],
   controllers: [AppController],
   providers: [AppService],
