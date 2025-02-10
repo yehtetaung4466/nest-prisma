@@ -8,17 +8,35 @@ import {
   import { Response } from 'express';
 import DAO from '../../shared/classes/dao';
 
-  
   @Catch(HttpException)
   export class GeneralHttpException implements ExceptionFilter {
     catch(exception: HttpException, host: ArgumentsHost) {
       const ctx = host.switchToHttp();
       const response = ctx.getResponse<Response>();
-      const status = exception.getStatus();
-      console.log(exception);
+      const status = exception.getStatus()
+      const exceptionResponse = exception.getResponse()
+      console.log(exceptionResponse);
       
-      // const message = exception.message
-      response.status(status).json(exception.getResponse());
+      
+      
+      
+      let message:string[]
+
+      if(typeof exceptionResponse === 'string') {
+        message = [exceptionResponse]
+      }else {
+        message = exceptionResponse["message"] ? [...exceptionResponse["message"]] : [exception.message]
+      }
+
+
+      // if(typeof exception.message === 'string' ) {
+      //   message = [exception.message]
+      // }else if(Array.isArray(exception.message)){
+      //   message = [...exception.message]
+      // }
+      response.status(status).json({
+        message,
+      });
     }
   }
   
@@ -31,7 +49,6 @@ import DAO from '../../shared/classes/dao';
         exception instanceof HttpException
           ? exception.getStatus()
           : HttpStatus.INTERNAL_SERVER_ERROR;
-      console.log(exception);
-      response.status(status).json(new DAO(['internal server error']));
+      response.status(status).json(new DAO(['Internal server error']));
     }
   }
