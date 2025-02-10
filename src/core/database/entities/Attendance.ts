@@ -10,19 +10,12 @@ export class Attendance {
         unique:true,
         length: 255,
     })
-    id:string
+    user_id:string
 
-    @Column({
-        length: 255,
-    })
-    date:string
     // @Column({
-    //     type: 'enum',
     //     length: 255,
-    //     enum: DOMAIN
-
+    //     default:
     // })
-    // domain:DOMAIN
-
+    // date:Date
     
 }
